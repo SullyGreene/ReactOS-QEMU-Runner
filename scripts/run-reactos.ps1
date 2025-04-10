@@ -1,12 +1,11 @@
 # run-reactos.ps1
 <#
 .SYNOPSIS
-    Boots ReactOS in QEMU with default settings.
+    Boots ReactOS in QEMU with user-defined settings from config/qemu-config.json.
 
 .DESCRIPTION
-    This script runs ReactOS in a virtual environment using QEMU.
-    You can customize memory, CPU, and image file by editing this script
-    or extending it to read from a config file.
+    Loads QEMU launch options from config/qemu-config.json, creates a virtual hard drive if missing,
+    and runs the ReactOS ISO in a QEMU VM.
 
 .NOTES
     Author: Sully Greene
@@ -14,26 +13,34 @@
 
 $ErrorActionPreference = "Stop"
 
-$QemuBin = "qemu-system-i386.exe"
+# Paths
+$ConfigPath = "$PSScriptRoot\..\config\qemu-config.json"
 $IsoPath = "$PSScriptRoot\..\isos\ReactOS-0.4.15-live.iso"
 $DiskImg = "$PSScriptRoot\..\reactos.img"
+$QemuBin = "qemu-system-i386.exe"
 
-# If disk image doesn't exist, create one (500MB)
+# Load configuration
+if (-Not (Test-Path $ConfigPath)) {
+    throw "Missing config file: $ConfigPath"
+}
+$config = Get-Content $ConfigPath | ConvertFrom-Json
+
+# Create disk image if needed
 if (-Not (Test-Path $DiskImg)) {
-    Write-Host "💾 Creating a 500MB virtual hard disk..."
-    qemu-img.exe create -f qcow2 $DiskImg 500M
+    Write-Host "💾 Creating a $($config.disk_size_mb)MB virtual hard disk..."
+    qemu-img.exe create -f qcow2 $DiskImg "$($config.disk_size_mb)M"
 }
 
-Write-Host "🚀 Launching ReactOS..."
+# Launch ReactOS in QEMU
+Write-Host "🚀 Launching ReactOS with settings from config..."
 & $QemuBin `
     -cdrom $IsoPath `
     -hda $DiskImg `
-    -boot d `
-    -m 512 `
-    -cpu qemu32 `
-    -vga std `
+    -boot $config.boot `
+    -m $config.memory `
+    -cpu $config.cpu `
+    -vga $config.vga `
     -net nic `
     -net user `
-    -name "ReactOS VM" `
-    -enable-kvm:$false
-
+    -name $config.vm_name `
+    -enable-kvm:$config.enable_kvm
