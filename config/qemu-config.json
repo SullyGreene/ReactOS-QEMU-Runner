@@ -1,0 +1,9 @@
+{
+  "memory": "512",         // RAM in MB
+  "cpu": "qemu32",         // CPU type
+  "vga": "std",            // VGA mode (std, cirrus, vmware, qxl)
+  "disk_size_mb": 500,     // Size of virtual hard disk in MB
+  "boot": "d",             // Boot from CD-ROM (d) or hard disk (c)
+  "enable_kvm": false,     // Enable KVM if supported (false for Windows)
+  "vm_name": "ReactOS VM"  // QEMU window name
+}
