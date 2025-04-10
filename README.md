@@ -25,7 +25,7 @@ This project automates the setup and execution of [ReactOS](https://reactos.org/
 
 1. **Clone this repository**
    ```bash
-   git clone https://github.com/yourname/reactos-qemu-runner.git
+   git clone https://github.com/SullyGreene/reactos-qemu-runner.git
    cd reactos-qemu-runner
    ```
 
